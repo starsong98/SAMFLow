@@ -25,6 +25,8 @@ from utils.utils import InputPadder, forward_interpolate
 import imageio
 import itertools
 import random
+from tqdm.auto import tqdm
+import csv
 
 TRAIN_SIZE = [432, 960]
 
@@ -131,9 +133,9 @@ def create_sintel_submission(model, sigma=0.05, cfg=None):
     model.eval()
     for dstype in ['final', "clean"]:
         test_dataset = datasets.MpiSintel(split='test', aug_params=None, dstype=dstype)
-        for test_id in range(len(test_dataset)):
-            if (test_id+1) % 100 == 0:
-                print(f"{test_id} / {len(test_dataset)}")
+        for test_id in tqdm(range(len(test_dataset))):
+            #if (test_id+1) % 100 == 0:
+            #    print(f"{test_id} / {len(test_dataset)}")
                 # break
             image1, image2, (sequence, frame) = test_dataset[test_id]
             image1, image2 = image1[None].cuda(), image2[None].cuda()
@@ -170,7 +172,7 @@ def create_kitti_submission(model, sigma=0.05, cfg=None):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
-    for test_id in range(len(test_dataset)):
+    for test_id in tqdm(range(len(test_dataset))):
         image1, image2, (frame_id, ) = test_dataset[test_id]
         new_shape = image1.shape[1:]
         if new_shape[1] != IMAGE_SIZE[1]:   # fix the height=432, adaptive ajust the width
@@ -204,9 +206,9 @@ def validate_sintel(model, sigma=0.05, cfg=None):
 
         epe_list = []
 
-        for val_id in range(len(val_dataset)):
-            if val_id % 50 == 0:
-                print(val_id)
+        for val_id in tqdm(range(len(val_dataset))):
+            #if val_id % 50 == 0:
+            #    print(val_id)
 
             image1, image2, flow_gt, _ = val_dataset[val_id]
             image1 = image1[None].cuda()
@@ -237,9 +239,13 @@ def validate_kitti(model, sigma=0.05, cfg=None):
     weights = compute_weight(hws, IMAGE_SIZE, TRAIN_SIZE, sigma)
     model.eval()
     val_dataset = datasets.KITTI(split='training')
+    if cfg.save_path is not None:
+        lines_to_save = [['filename0', 'filename1', 'kitti-epe', 'kitti-f1']]
+        if not os.path.isdir(cfg.save_path):
+            os.makedirs(cfg.save_path)
 
     out_list, epe_list = [], []
-    for val_id in range(len(val_dataset)):
+    for val_id in tqdm(range(len(val_dataset))):
         image1, image2, flow_gt, valid_gt = val_dataset[val_id]
         new_shape = image1.shape[1:]
         if new_shape[1] != IMAGE_SIZE[1]:
@@ -289,6 +295,7 @@ if __name__ == '__main__':
     # parser.add_argument('--model_path', help='ckpt path')
     parser.add_argument('--eval', help='eval benchmark: sintel_validation | kitti_validation | sintel_submission | kitti_submission')
     parser.add_argument('--save_path', type=str)
+    parser.add_argument('--input_path', help='path to folder containing frames of a video to perform inference on. not used for regular eval/subs')
     args = parser.parse_args()
 
     if args.model_type == 'SAMFlow-H':
@@ -326,6 +333,11 @@ if __name__ == '__main__':
         exp_func = validate_kitti
         cfg = get_cfg()
         cfg.FlowModel.decoder_depth = 24
+    elif args.eval == 'inference':  # inference on unlabeled video
+        exp_func = infer_video
+        cfg = get_cfg()
+        cfg.FlowModel.decoder_depth = 32
+        #cfg.infer_path = args.infer_path
     else:
         print(f"EROOR: {args.eval} is not valid")
     cfg.update(vars(args))

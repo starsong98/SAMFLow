@@ -100,7 +100,7 @@ class FlowDataset(data.Dataset):
         
 
 class MpiSintel(FlowDataset):
-    def __init__(self, aug_params=None, split='training', root='/home/user2/dataset/opticalflow/MPI-Sintel-complete', dstype='clean'):
+    def __init__(self, aug_params=None, split='training', root="datasets/Sintel", dstype='clean'):
         super(MpiSintel, self).__init__(aug_params)
         flow_root = osp.join(root, split, 'flow')
         image_root = osp.join(root, split, dstype)
@@ -119,7 +119,7 @@ class MpiSintel(FlowDataset):
 
 
 class FlyingChairs(FlowDataset):
-    def __init__(self, aug_params=None, split='train', root='/home/user2/dataset/opticalflow/FlyingChairs_release/data'):
+    def __init__(self, aug_params=None, split='train', root='datasets/FlyingChairs_release/data'):
         super(FlyingChairs, self).__init__(aug_params)
 
         images = sorted(glob(osp.join(root, '*.ppm')))
@@ -135,7 +135,7 @@ class FlyingChairs(FlowDataset):
 
 
 class FlyingThings3D(FlowDataset):
-    def __init__(self, aug_params=None, root='/home/user2/dataset/opticalflow/flyingthings3d_complete', dstype='frames_cleanpass', split='training'):
+    def __init__(self, aug_params=None, root='datasets/FlyingThings3D', dstype='frames_cleanpass', split='training'):
         super(FlyingThings3D, self).__init__(aug_params)
 
         split_dir = 'TRAIN' if split == 'training' else 'TEST'
@@ -159,7 +159,7 @@ class FlyingThings3D(FlowDataset):
                             self.flow_list += [ flows[i+1] ]
 
 class FlyingThings3DDistract(FlowDataset):
-    def __init__(self, aug_params=None, root='/home/user2/dataset/opticalflow/flyingthings3d_complete', dstype='frames_cleanpass', split='training'):
+    def __init__(self, aug_params=None, root='datasets/FlyingThings3D', dstype='frames_cleanpass', split='training'):
         super(FlyingThings3DDistract, self).__init__(aug_params)
 
         split_dir = 'TRAIN' if split == 'training' else 'TEST'
@@ -257,7 +257,7 @@ class FlyingThings3DDistract(FlowDataset):
 
 
 class KITTI(FlowDataset):
-    def __init__(self, aug_params=None, split='training', root='/home/user2/dataset/opticalflow/KITTI/kitti/2015/data_scene_flow'):
+    def __init__(self, aug_params=None, split='training', root='datasets/KITTI'):
         super(KITTI, self).__init__(aug_params, sparse=True)
         if split == 'testing':
             self.is_test = True
@@ -276,7 +276,7 @@ class KITTI(FlowDataset):
 
 
 class HD1K(FlowDataset):
-    def __init__(self, aug_params=None, root='/home/user2/dataset/opticalflow/HD1K'):
+    def __init__(self, aug_params=None, root='datasets/HD1k'):
         super(HD1K, self).__init__(aug_params, sparse=True)
 
         seq_ix = 0

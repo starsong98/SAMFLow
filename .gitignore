@@ -1,2 +1,10 @@
 weights/*
 **/*.pyc
+*.pyc
+**/__pycache__
+alt_cuda_corr/build
+alt_cuda_corr/correlation.egg-info
+alt_cuda_corr/dist
+datasets
+results
+weights
